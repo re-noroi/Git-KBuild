@@ -63,6 +63,18 @@ jobs:
             sed -i -e 's/CONFIG_LOCALVERSION="-FakeDreamer"/CONFIG_LOCALVERSION="${{ github.event.inputs.CUSTOM_SED }}"/' arch/arm64/configs/vendor/apollo_defconfig
           fi
 
+      - name: Remove cycle count
+        run: |
+          cd kernel_tree
+          sed -i '/case POWER_SUPPLY_PROP_CYCLE_COUNT:/,/break;/c\
+          \tcase POWER_SUPPLY_PROP_CYCLE_COUNT:\
+          \t#ifdef CONFIG_BATT_VERIFY_BY_DS28E16\
+          \t\tpval->intval = fg->maxim_cycle_count;\
+          \t#else\
+          \t\trc = get_cycle_count(chip->counter, &pval->intval);\
+          \t#endif\
+          \t\tbreak;' drivers/power/supply/qcom/qpnp-fg-gen4.c
+
       - name: Apply Patches
         run: |
           cd kernel_tree
