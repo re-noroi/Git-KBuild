@@ -27,10 +27,6 @@ on:
         description: 'AnyKernel Url (leave blank if you dont want AnyKernel)'
         default: 'https://github.com/re-noroi/anykernel3-test'
         required: false
-      CUSTOM_SED:
-        description: 'Custom Kernel Version'
-        default: '-FakeDreamer'
-        required: false
 
 jobs:
   build:
@@ -69,13 +65,6 @@ jobs:
         run: |
           cd kernel_tree
           sed -i -e '/qcom,j3s-batt-profile;/d' arch/arm64/boot/dts/vendor/qcom/alioth-sm8250.dtsi
-      
-      - name: Kernel Version
-        run: |
-          cd kernel_tree
-          if [[ "${{ github.event.inputs.CUSTOM_SED }}" != "-FakeDreamer" ]]; then
-            sed -i -e 's/CONFIG_LOCALVERSION="-FakeDreamer"/CONFIG_LOCALVERSION="${{ github.event.inputs.CUSTOM_SED }}"/' arch/arm64/configs/vendor/alioth_defconfig
-          fi
       
       - name: Apply Patches
         if: matrix.kernel
