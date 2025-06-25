@@ -55,14 +55,19 @@ jobs:
           
       - name: Set Kernel Environment Variables
         run: |
-          echo "KERNEL_TREE=${{ github.event.inputs.KERNEL_TREE_1 }}" >> $GITHUB_ENV
           case "${{ matrix.kernel }}" in
             1) echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_1 }}" >> $GITHUB_ENV ;;
             2) echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_2 }}" >> $GITHUB_ENV ;;
           esac
           
-      - name: Checkout Kernel
-        run: git clone --depth=1 $KERNEL_TREE -b $KERNEL_TREE_BRANCH kernel_tree
+      - name: Checkout Kernel via PAT
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git clone --depth=1 \
+          --branch "${{ env.KERNEL_TREE_BRANCH }}" \
+          https://x-access-token:${GH_PAT}@github.com/re-noroi/FD-private.git \
+          kernel_tree
 
       - name: Change different battery type
         if: matrix.kernel == 1
