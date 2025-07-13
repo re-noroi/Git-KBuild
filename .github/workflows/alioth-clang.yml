@@ -48,7 +48,7 @@ jobs:
 
       - name: Download & Extract Clang
         run: |
-          wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/0998f421320ae02fddabec8a78b91bf7620159f6/clang-r563880.tar.gz -O clang.tar.gz
+          wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/aceb3124c56eb7a458ddf040aaca50a3d4382bdb/clang-r563880.tar.gz -O clang.tar.gz
           mkdir clang
           tar -xf clang.tar.gz -C clang
           
