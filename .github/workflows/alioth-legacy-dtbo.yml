@@ -31,6 +31,10 @@ on:
         description: 'Custom Kernel Version'
         default: '-FakeDreamer'
         required: false
+      COMPILER:
+        description: 'default=neutron, write aosp for aosp 20 clang'
+        default: 'neutron'
+        required: false
 
 jobs:
   build:
@@ -48,10 +52,16 @@ jobs:
 
       - name: Download & Extract Clang
         run: |
-          wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/10032024/neutron-clang-10032024.tar.zst -O clang.tar.zst
-          mkdir clang
-          unzstd -d clang.tar.zst
-          tar -xf clang.tar -C clang
+          if [[ "${{ github.event.inputs.COMPILER }}" == "aosp" ]]; then
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz
+            mkdir clang
+            tar -xf clang.tar.gz -C clang
+          else
+            wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/10032024/neutron-clang-10032024.tar.zst -O clang.tar.zst
+            mkdir clang
+            unzstd -d clang.tar.zst
+            tar -xf clang.tar -C clang
+          fi
           
       - name: Set Kernel Environment Variables
         run: |
