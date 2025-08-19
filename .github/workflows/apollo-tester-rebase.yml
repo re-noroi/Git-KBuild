@@ -36,7 +36,7 @@ jobs:
   build:
     strategy:
       matrix:
-        type: [original, modified, snormal, enormal]
+        kernel: [1, 2, 3, 4]
     runs-on: ubuntu-latest
     env:
       UPLOAD_TO_RELEASE: false
@@ -94,7 +94,7 @@ jobs:
           \t\tbreak;' drivers/power/supply/qcom/qpnp-fg-gen4.c
 
       - name: Revert to stock gpufreq
-        if: matrix.type == "snormal" || matrix.type == "enormal"
+        if: matrix.kernel == 3 || matrix.kernel == 4
         run: |
           cd kernel_tree
           patch -p1 -f < "0001-stock-gpu-freq.patch"
@@ -105,7 +105,7 @@ jobs:
           bash nextpatch.sh
 
       - name: Apply Modifications (if modified build)
-        if: matrix.type == 'modified' || matrix.type == 'enormal'
+        if: matrix.kernel == 2 || matrix.kernel == 4
         run: |
           cd kernel_tree
           sed -i -e '/<2553600>,/c\<2553600>;' arch/arm64/boot/dts/vendor/qcom/kona.dtsi
@@ -127,23 +127,23 @@ jobs:
           cd kernel_tree
           make O=out vendor/apollo_defconfig
           make O=out CC=clang -j$(nproc --all) CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
-          if [[ "${{ matrix.type }}" == "original" ]]; then
+          if [[ "${{ matrix.kernel }}" == 1 ]]; then
             mv out/arch/arm64/boot/dtbo.img ../apollo-aosp-dtbo.img
             mv out/arch/arm64/boot/dtb.img ../apollo-normal-dtb
             cp out/arch/arm64/boot/Image.gz ../Image.gz
-          elif [[ "${{ matrix.type }}" == "modified" ]]; then
+          elif [[ "${{ matrix.kernel }}" == 2 ]]; then
             mv out/arch/arm64/boot/dtbo.img ../apollo-miui-dtbo.img
             mv out/arch/arm64/boot/dtb.img ../apollo-effcpu-dtb
-          elif [[ "${{ matrix.type }}" == "snormal" ]]; then
+          elif [[ "${{ matrix.kernel }}" == 3 ]]; then
             mv out/arch/arm64/boot/dtb.img ../apollo-normal-gpustk-dtb
-          elif [[ "${{ matrix.type }}" == "enormal" ]]; then
+          elif [[ "${{ matrix.kernel }}" == 4 ]]; then
             mv out/arch/arm64/boot/dtb.img ../apollo-effcpu-gpustk-dtb
           fi
 
       - name: Upload Kernel Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-1-${{ matrix.type }}
+          name: kernel-1-${{ matrix.kernel }}
           path: |
             *.img
             *-dtb
@@ -157,36 +157,36 @@ jobs:
       - name: Download Kernel Build Original
         uses: actions/download-artifact@v4
         with:
-          name: kernel-1-original
-          path: kernel-1-original
+          name: kernel-1-1
+          path: kernel-1-1
 
       - name: Download Kernel Build Modified
         uses: actions/download-artifact@v4
         with:
-          name: kernel-1-modified
-          path: kernel-1-modified
+          name: kernel-1-2
+          path: kernel-1-2
 
       - name: Download Kernel Build Stock + Stock GPU
         uses: actions/download-artifact@v4
         with:
-          name: kernel-1-snormal
-          path: kernel-1-snormal
+          name: kernel-1-3
+          path: kernel-1-3
 
       - name: Download Kernel Build Effcpu + Stock GPU
         uses: actions/download-artifact@v4
         with:
-          name: kernel-1-enormal
-          path: kernel-1-enormal
+          name: kernel-1-4
+          path: kernel-1-4
 
       - name: Clone AnyKernel3
         run: git clone --recursive --depth=1 ${{ github.event.inputs.ANYKERNEL_URL }} -b apollo AnyKernel3-1
 
       - name: Move Kernel Files to AnyKernel3
         run: |
-          mv kernel-1-original/* AnyKernel3-1/
-          mv kernel-1-modified/* AnyKernel3-1/
-          mv kernel-1-snormal/* AnyKernel3-1/
-          mv kernel-1-enormal/* AnyKernel3-1/
+          mv kernel-1-1/* AnyKernel3-1/
+          mv kernel-1-2/* AnyKernel3-1/
+          mv kernel-1-3/* AnyKernel3-1/
+          mv kernel-1-4/* AnyKernel3-1/
 
       - name: Define ZIP Name
         run: |
