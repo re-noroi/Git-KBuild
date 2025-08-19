@@ -130,7 +130,16 @@ jobs:
           cd kernel_tree
           make O=out vendor/alioth_defconfig
           make O=out CC=clang -j$(nproc --all) CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
-          if [[ "${{ matrix.kernel }}" == 3 ]]; then
+          if [[ "${{ matrix.kernel }}" == 1 ]]; then
+            if [[ "${{ matrix.type }}" == "original" ]]; then
+              cp out/arch/arm64/boot/Image.gz ../Image.gz
+              mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-aosp.img
+              mv out/arch/arm64/boot/dtb.img ../alioth-normal-dtb
+            else
+              mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-miui.img
+              mv out/arch/arm64/boot/dtb.img ../alioth-effcpu-dtb
+            fi
+          elif [[ "${{ matrix.kernel }}" == 3 ]]; then
             if [[ "${{ matrix.type }}" == "original" ]]; then
               mv out/arch/arm64/boot/dtb.img ../alioth-normal-gpustk-dtb
             else
@@ -139,11 +148,8 @@ jobs:
           else
             if [[ "${{ matrix.type }}" == "original" ]]; then
               mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-aosp.img
-              mv out/arch/arm64/boot/dtb.img ../alioth-normal-dtb
-              cp out/arch/arm64/boot/Image.gz ../Image.gz
             else
               mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-miui.img
-              mv out/arch/arm64/boot/dtb.img ../alioth-effcpu-dtb
             fi
           fi
 
@@ -152,19 +158,9 @@ jobs:
         with:
           name: kernel-${{ matrix.kernel }}-${{ matrix.type }}
           path: |
-            if [[ "${{ matrix.kernel }}" == 1 ]]; then
-              Image.gz
-              alioth-${DTBO_TAG}-dtbo-aosp.img
-              alioth-${DTBO_TAG}-dtbo-miui.img
-              alioth-normal-dtb
-              alioth-effcpu-dtb
-            else if [[ "${{ matrix.kernel }}" == 2 ]]; then
-              alioth-${DTBO_TAG}-dtbo-aosp.img
-              alioth-${DTBO_TAG}-dtbo-miui.img
-            else
-              alioth-normal-gpustk-dtb
-              alioth-effcpu-gpustk-dtb
-            fi
+            *.img
+            *-dtb
+            Image.gz
 
   package_anykernel:
     needs: build
