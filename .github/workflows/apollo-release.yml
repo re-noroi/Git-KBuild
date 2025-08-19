@@ -1,4 +1,4 @@
-name: FD-apollo-release-builds
+name: FD-release-apollo-builder
 
 on:
   pull_request:
@@ -8,8 +8,8 @@ on:
         description: 'Custom Build Title'
         required: false
       KERNEL_TREE_1:
-        description: 'Kernel Tree 1'
-        default: 'private'
+        description: 'Kernel Tree'
+        default: 'public'
         required: true
       CODENAME:
         description: 'Phone Codename'

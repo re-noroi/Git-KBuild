@@ -1,4 +1,4 @@
-name: FD-apollo-tester-builds
+name: FD-tester-apollo-builder
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
         required: false
       KERNEL_TREE_1:
         description: 'Kernel Tree 1'
-        default: 'private'
+        default: 'public'
         required: true
       KERNEL_TREE_BRANCH_1:
         description: 'Kernel Tree Branch 1'
