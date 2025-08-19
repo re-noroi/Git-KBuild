@@ -200,13 +200,25 @@ jobs:
           name: kernel-${{ matrix.kernel }}-base
           path: kernel-${{ matrix.kernel }}-base
 
-      - name: Download Kernel Build Addon
+      - name: Download Kernel Build Addon 1
         uses: actions/download-artifact@v4
         with:
-          name: kernel-part-${{ matrix.kernel }}-addon
-          path: kernel-part-${{ matrix.kernel }}-addon
+          name: kernel-part-1-addon
+          path: kernel-part-1-addon
 
-      - name: Download Kernel Build Addon Extra
+      - name: Download Kernel Build Addon 2
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-part-2-addon
+          path: kernel-part-2-addon
+
+      - name: Download Kernel Build Addon 3
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-part-3-addon
+          path: kernel-part-3-addon
+
+      - name: Download Kernel Build Addon 4
         uses: actions/download-artifact@v4
         with:
           name: kernel-part-4-addon
