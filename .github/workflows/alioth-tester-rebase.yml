@@ -166,10 +166,10 @@ jobs:
               alioth-effcpu-gpustk-dtb
             fi
 
-package_anykernel:
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
+  package_anykernel:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: Download Kernel Build Original (stk)
       uses: actions/download-artifact@v4
       with:
