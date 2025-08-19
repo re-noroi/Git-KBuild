@@ -1,4 +1,4 @@
-name: FD-apollo-test-rebase-neutron-clang-10032024
+name: FD-apollo-tester-builds
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
         required: false
       KERNEL_TREE_1:
         description: 'Kernel Tree 1'
-        default: 'https://github.com/re-noroi/kernel_sm8250'
+        default: 'private'
         required: true
       KERNEL_TREE_BRANCH_1:
         description: 'Kernel Tree Branch 1'
@@ -36,7 +36,7 @@ jobs:
   build:
     strategy:
       matrix:
-        type: [original, modified]
+        type: [original, modified, snormal, enormal]
     runs-on: ubuntu-latest
     env:
       UPLOAD_TO_RELEASE: false
@@ -63,8 +63,16 @@ jobs:
           echo "KERNEL_TREE=${{ github.event.inputs.KERNEL_TREE_1 }}" >> $GITHUB_ENV
           echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_1 }}" >> $GITHUB_ENV
 
-      - name: Checkout Kernel
-        run: git clone --depth=1 $KERNEL_TREE -b $KERNEL_TREE_BRANCH kernel_tree
+      - name: Checkout Kernel via PAT
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          if [[ "${{ github.event.inputs.KERNEL_TREE_1 }}" == "private" ]]; then
+            REPO_URL="https://x-access-token:${GH_PAT}@github.com/re-noroi/FD-private.git"
+          else
+            REPO_URL="https://github.com/re-noroi/kernel_sm8250"
+          fi
+          git clone --depth=1 --branch "${{ env.KERNEL_TREE_BRANCH }}" "${REPO_URL}" kernel_tree
 
       - name: Kernel Version
         run: |
@@ -85,13 +93,19 @@ jobs:
           \t#endif\
           \t\tbreak;' drivers/power/supply/qcom/qpnp-fg-gen4.c
 
+      - name: Revert to stock gpufreq
+        if: matrix.type == "snormal" || matrix.type == "enormal"
+        run: |
+          cd kernel_tree
+          patch -p1 -f < "0001-stock-gpu-freq.patch"
+
       - name: Apply Patches
         run: |
           cd kernel_tree
           bash nextpatch.sh
 
       - name: Apply Modifications (if modified build)
-        if: matrix.type == 'modified'
+        if: matrix.type == 'modified' || matrix.type == 'enormal'
         run: |
           cd kernel_tree
           sed -i -e '/<2553600>,/c\<2553600>;' arch/arm64/boot/dts/vendor/qcom/kona.dtsi
@@ -117,9 +131,13 @@ jobs:
             mv out/arch/arm64/boot/dtbo.img ../apollo-aosp-dtbo.img
             mv out/arch/arm64/boot/dtb.img ../apollo-normal-dtb
             cp out/arch/arm64/boot/Image.gz ../Image.gz
-          else
+          elif [[ "${{ matrix.type }}" == "modified" ]]; then
             mv out/arch/arm64/boot/dtbo.img ../apollo-miui-dtbo.img
             mv out/arch/arm64/boot/dtb.img ../apollo-effcpu-dtb
+          elif [[ "${{ matrix.type }}" == "snormal" ]]; then
+            mv out/arch/arm64/boot/dtb.img ../apollo-normal-gpustk-dtb
+          elif [[ "${{ matrix.type }}" == "enormal" ]]; then
+            mv out/arch/arm64/boot/dtb.img ../apollo-effcpu-gpustk-dtb
           fi
 
       - name: Upload Kernel Artifacts
@@ -127,10 +145,8 @@ jobs:
         with:
           name: kernel-1-${{ matrix.type }}
           path: |
-            apollo-aosp-dtbo.img
-            apollo-miui-dtbo.img
-            apollo-normal-dtb
-            apollo-effcpu-dtb
+            *.img
+            *-dtb
             Image.gz
 
   package_anykernel:
@@ -150,6 +166,18 @@ jobs:
           name: kernel-1-modified
           path: kernel-1-modified
 
+      - name: Download Kernel Build Stock + Stock GPU
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-1-snormal
+          path: kernel-1-snormal
+
+      - name: Download Kernel Build Effcpu + Stock GPU
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-1-enormal
+          path: kernel-1-enormal
+
       - name: Clone AnyKernel3
         run: git clone --recursive --depth=1 ${{ github.event.inputs.ANYKERNEL_URL }} -b apollo AnyKernel3-1
 
@@ -157,6 +185,8 @@ jobs:
         run: |
           mv kernel-1-original/* AnyKernel3-1/
           mv kernel-1-modified/* AnyKernel3-1/
+          mv kernel-1-snormal/* AnyKernel3-1/
+          mv kernel-1-enormal/* AnyKernel3-1/
 
       - name: Define ZIP Name
         run: |
