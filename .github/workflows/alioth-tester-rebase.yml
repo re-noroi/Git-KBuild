@@ -77,7 +77,7 @@ jobs:
       - name: Set DTBO tag (stk / j3s)
         run: |
           if [[ "${{ matrix.kernel }}" == "1" ]]; then
-            echo "DTBO_TAG=stk" >> $GITHUB_ENV
+            echo "DTBO_TAG=stock" >> $GITHUB_ENV
           else
             echo "DTBO_TAG=j3s" >> $GITHUB_ENV
           fi
