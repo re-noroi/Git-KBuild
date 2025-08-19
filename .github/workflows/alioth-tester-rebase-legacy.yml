@@ -79,6 +79,12 @@ jobs:
         run: |
           cd kernel_tree
           sed -i -e '/qcom,j3s-batt-profile;/d' arch/arm64/boot/dts/vendor/qcom/alioth-sm8250.dtsi
+
+      - name: Revert to stock gpufreq
+        if: matrix.kernel == 3
+        run: |
+          cd kernel_tree
+          patch -p1 -f < "0001-stock-gpu-freq.patch"
       
       - name: Kernel Version
         run: |
