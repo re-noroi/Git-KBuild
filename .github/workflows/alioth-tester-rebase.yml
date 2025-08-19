@@ -1,4 +1,4 @@
-name: FD-alioth-test-rebase-neutron-clang-10032024
+name: FD-alioth-tester-builds
 
 on:
   pull_request:
@@ -9,14 +9,10 @@ on:
         required: false
       KERNEL_TREE_1:
         description: 'Kernel Tree 1'
-        default: 'https://github.com/re-noroi/FD-private'
+        default: 'private'
         required: true
       KERNEL_TREE_BRANCH_1:
         description: 'Kernel Tree Branch 1'
-        default: 'freesia'
-        required: true
-      KERNEL_TREE_BRANCH_2:
-        description: 'Kernel Tree Branch 2'
         default: 'freesia'
         required: true
       CODENAME:
@@ -40,7 +36,7 @@ jobs:
   build:
     strategy:
       matrix:
-        kernel: [1, 2]
+        kernel: [1, 2, 3]
         type: [original, modified]
     runs-on: ubuntu-latest
     env:
@@ -65,19 +61,26 @@ jobs:
           
       - name: Set Kernel Environment Variables
         run: |
-          case "${{ matrix.kernel }}" in
-            1) echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_1 }}" >> $GITHUB_ENV ;;
-            2) echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_2 }}" >> $GITHUB_ENV ;;
-          esac
+          echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_1 }}" >> $GITHUB_ENV
           
       - name: Checkout Kernel via PAT
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git clone --depth=1 \
-          --branch "${{ env.KERNEL_TREE_BRANCH }}" \
-          https://x-access-token:${GH_PAT}@github.com/re-noroi/FD-private.git \
-          kernel_tree
+          if [[ "${{ github.event.inputs.KERNEL_TREE_1 }}" == "private" ]]; then
+            REPO_URL="https://x-access-token:${GH_PAT}@github.com/re-noroi/FD-private.git"
+          else
+            REPO_URL="https://github.com/re-noroi/kernel_sm8250"
+          fi
+          git clone --depth=1 --branch "${{ env.KERNEL_TREE_BRANCH }}" "${REPO_URL}" kernel_tree
+
+      - name: Set DTBO tag (stk / j3s)
+        run: |
+          if [[ "${{ matrix.kernel }}" == "1" ]]; then
+            echo "DTBO_TAG=stk" >> $GITHUB_ENV
+          else
+            echo "DTBO_TAG=j3s" >> $GITHUB_ENV
+          fi
 
       - name: Change different battery type
         if: matrix.kernel == 1
@@ -121,13 +124,21 @@ jobs:
           cd kernel_tree
           make O=out vendor/alioth_defconfig
           make O=out CC=clang -j$(nproc --all) CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
-          if [[ "${{ matrix.type }}" == "original" ]]; then
-            mv out/arch/arm64/boot/dtbo.img ../alioth-j3s-dtbo-aosp.img
-            mv out/arch/arm64/boot/dtb.img ../alioth-normal-dtb
-            cp out/arch/arm64/boot/Image.gz ../Image.gz
+          if [[ "${{ matrix.kernel }}" == 3 ]]; then
+            if [[ "${{ matrix.type }}" == "original" ]]; then
+              mv out/arch/arm64/boot/dtb.img ../alioth-normal-gpustk-dtb
+            else
+              mv out/arch/arm64/boot/dtb.img ../alioth-effcpu-gpustk-dtb
+            fi
           else
-            mv out/arch/arm64/boot/dtbo.img ../alioth-j3s-dtbo-miui.img
-            mv out/arch/arm64/boot/dtb.img ../alioth-effcpu-dtb
+            if [[ "${{ matrix.type }}" == "original" ]]; then
+              mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-aosp.img
+              mv out/arch/arm64/boot/dtb.img ../alioth-normal-dtb
+              cp out/arch/arm64/boot/Image.gz ../Image.gz
+            else
+              mv out/arch/arm64/boot/dtbo.img ../alioth-${DTBO_TAG}-dtbo-miui.img
+              mv out/arch/arm64/boot/dtb.img ../alioth-effcpu-dtb
+            fi
           fi
 
       - name: Upload Kernel Artifacts
@@ -135,10 +146,12 @@ jobs:
         with:
           name: kernel-${{ matrix.kernel }}-${{ matrix.type }}
           path: |
-            alioth-j3s-dtbo-aosp.img
-            alioth-j3s-dtbo-miui.img
+            alioth-${DTBO_TAG}-dtbo-aosp.img
+            alioth-${DTBO_TAG}-dtbo-miui.img
             alioth-normal-dtb
             alioth-effcpu-dtb
+            alioth-normal-gpustk-dtb
+            alioth-effcpu-gpustk-dtb
             Image.gz
 
   package_anykernel:
@@ -161,6 +174,18 @@ jobs:
           name: kernel-${{ matrix.kernel }}-modified
           path: kernel-${{ matrix.kernel }}-modified
 
+      - name: Download GPU DTBs (matrix 3)
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-3-original
+          path: kernel-3-original
+
+      - name: Download GPU DTBs Modified (matrix 3)
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel-3-modified
+          path: kernel-3-modified
+
       - name: Clone AnyKernel3
         run: git clone --recursive --depth=1 ${{ github.event.inputs.ANYKERNEL_URL }} -b main AnyKernel3-${{ matrix.kernel }}
 
@@ -168,6 +193,8 @@ jobs:
         run: |
           mv kernel-${{ matrix.kernel }}-original/* AnyKernel3-${{ matrix.kernel }}/
           mv kernel-${{ matrix.kernel }}-modified/* AnyKernel3-${{ matrix.kernel }}/
+          cp kernel-3-original/alioth-normal-gpustk-dtb AnyKernel3-${{ matrix.kernel }}/alioth-normal-gpustk-dtb
+          cp kernel-3-modified/alioth-effcpu-gpustk-dtb AnyKernel3-${{ matrix.kernel }}/alioth-effcpu-gpustk-dtb
 
       - name: Define ZIP Name
         run: |
