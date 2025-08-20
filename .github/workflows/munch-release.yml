@@ -9,7 +9,7 @@ on:
         required: false
       KERNEL_TREE_1:
         description: 'Kernel Tree'
-        default: 'public'
+        default: 'https://github.com/re-noroi/kernel_sm8250'
         required: true
       CODENAME:
         description: 'Phone Codename'
@@ -71,7 +71,7 @@ jobs:
           if [[ "${{ github.event.inputs.KERNEL_TREE_1 }}" == "private" ]]; then
             REPO_URL="https://x-access-token:${GH_PAT}@github.com/re-noroi/FD-private.git"
           else
-            REPO_URL="https://github.com/re-noroi/kernel_sm8250"
+            REPO_URL="${{ github.event.inputs.KERNEL_TREE_1 }}"
           fi
           git clone --depth=1 --branch "${{ env.KERNEL_TREE_BRANCH }}" "${REPO_URL}" kernel_tree
 
