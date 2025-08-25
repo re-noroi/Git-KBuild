@@ -37,9 +37,9 @@ on:
         required: true
         type: choice
         options:
-          - yes
-          - no
-        default: no
+          - 'yes'
+          - 'no'
+        default: 'no'
 
 jobs:
   build:
