@@ -28,9 +28,13 @@ on:
         default: '-FakeDreamer'
         required: false
       COMPILER:
-        description: 'default=neutron, write aosp for aosp 20 clang'
-        default: 'neutron'
-        required: false
+        description: 'Choose compiler'
+        required: true
+        type: choice
+        options:
+          - neutron
+          - aosp
+        default: neutron
 
 jobs:
   build:
