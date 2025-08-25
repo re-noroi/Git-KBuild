@@ -32,6 +32,14 @@ on:
           - neutron
           - aosp
         default: neutron
+      PATCH_SKIP:
+        description: 'select yes if for stable branch'
+        required: true
+        type: choice
+        options:
+          - yes
+          - no
+        default: no
 
 jobs:
   build:
@@ -101,6 +109,7 @@ jobs:
           patch -p1 -f < "0001-stock-gpu-freq.patch"
 
       - name: Apply Patches
+        if: ${{ github.event.inputs.PATCH_SKIP == 'no' }}
         run: |
           cd kernel_tree
           bash nextpatch.sh

@@ -32,6 +32,14 @@ on:
           - neutron
           - aosp
         default: neutron
+      PATCH_SKIP:
+        description: 'select yes if for stable branch'
+        required: true
+        type: choice
+        options:
+          - yes
+          - no
+        default: no
 
 jobs:
   build:
@@ -103,7 +111,7 @@ jobs:
           fi
       
       - name: Apply Patches
-        if: matrix.kernel
+        if: ${{ github.event.inputs.PATCH_SKIP == 'no' }}
         run: |
           cd kernel_tree
           bash nextpatch.sh
