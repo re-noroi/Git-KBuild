@@ -28,6 +28,13 @@ on:
           - neutron
           - aosp
         default: neutron
+      LTO_CHOICE:
+        required: true
+        type: choice
+        options:
+          - full_lto
+          - thin_lto
+        default: full_lto
 
 jobs:
   build:
@@ -106,6 +113,13 @@ jobs:
         run: |
           cd kernel_tree
           patch -p1 -f < "0001-stock-gpu-freq.patch"
+
+      - name: Change LTO Type
+        if: ${{ github.event.inputs.LTO_CHOICE == 'thin_lto' }}
+        run: |
+          cd kernel_tree
+          sed -i -e '/# CONFIG_LTO_CLANG_THIN is not set/c\CONFIG_LTO_CLANG_THIN=y;' arch/arm64/configs/vendor/apollo_defconfig
+          sed -i -e '/CONFIG_LTO_CLANG_FULL=y/c\# CONFIG_LTO_CLANG_FULL is not set;' arch/arm64/configs/vendor/apollo_defconfig
 
       - name: Apply Modifications (if modified build)
         if: matrix.kernel == 2 || matrix.kernel == 4
