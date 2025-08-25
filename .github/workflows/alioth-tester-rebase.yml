@@ -4,9 +4,6 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      BUILD_TITLE:
-        description: 'Custom Build Title'
-        required: false
       KERNEL_TREE_1:
         description: 'Kernel Tree'
         default: 'https://github.com/re-noroi/kernel_sm8250'
