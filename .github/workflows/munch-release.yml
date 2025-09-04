@@ -27,7 +27,7 @@ on:
         options:
           - neutron
           - aosp
-        default: neutron
+        default: aosp
       LTO_CHOICE:
         required: true
         type: choice
