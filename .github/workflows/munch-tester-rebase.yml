@@ -31,6 +31,7 @@ on:
         options:
           - neutron
           - aosp
+          - aosp-21
         default: aosp
       LTO_CHOICE:
         required: true
@@ -65,6 +66,10 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.COMPILER }}" == "aosp" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz
+            mkdir clang
+            tar -xf clang.tar.gz -C clang
+          elif [[ "${{ github.event.inputs.COMPILER }}" == "aosp-21" ]]; then
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/d0e0a3882edb1acc193263ae98fce706e82aca38/clang-r574158.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
