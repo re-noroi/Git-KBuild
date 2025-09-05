@@ -1,5 +1,27 @@
-Kernel Builder using github action
-used for compiling Fake Dreamer Kernel for alioth
-this workflow can output full build with 1 Image.gz, 2 dtb and 2 dtbo that's needed for Fake Dreamer Kernel
+FakeDreamer Kernel Builder using github action
 
-use it however you like
+Currently support alioth, apollo and munch.
+
+Notes:
+1. Tester workflow build from branch from workflow input
+2. Release workflow builds from next-main, next-susfs and no-ksu branches respectively,
+   if you want to change it to another branches please edit the workflow directly or use
+   Tester workflow instead
+3. Support for other Mi-Kona might be added in the future.
+4. Support AOSP Clang 20 and Neutron Clang 19, more will be added in the future.
+
+How to use:
+1. For tester workflow, input:
+   - Repository Link
+   - Branch
+   - Compiler
+   - LTO (Default FullLTO)
+2. Run with nextpatch.sh (required to fetch latest KSUNext)
+   If you want to skip it, please modify your Repo according to your needs
+3. Default is using undervolted GPU Freq and using a patch to add make it Stock GPU Freq
+   (This might be changed in the future)
+4. Run the workflow, output will be a single .zip file with:
+   - Alioth = (4 dtbo, 4 dtb and 1 Image.gz)
+   - The rest = (2 dtbo, 4 dtb and 1 Image.gz)
+  
+If you found any issue, contact me on Telegram (@KaminariKo).
