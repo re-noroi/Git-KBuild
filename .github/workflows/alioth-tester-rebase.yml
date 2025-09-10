@@ -70,7 +70,7 @@ jobs:
             mkdir clang
             tar -xf clang.tar.gz -C clang
           elif [[ "${{ github.event.inputs.COMPILER }}" == "aosp-21" ]]; then
-            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/d0e0a3882edb1acc193263ae98fce706e82aca38/clang-r574158.tar.gz -O clang.tar.gz
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/603a89415bbb04dff8bc577b95534479ec13fdc5/clang-r574158.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
