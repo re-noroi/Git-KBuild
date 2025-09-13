@@ -48,6 +48,14 @@ on:
           - 'yes'
           - 'no'
         default: 'no'
+      OPLUS_FEATURES:
+        description: 'select yes if you want oplus features'
+        required: true
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
+        default: 'no'
 
 jobs:
   build:
@@ -125,6 +133,12 @@ jobs:
         run: |
           cd kernel_tree
           bash nextpatch.sh
+
+      - name: Oplus Features
+        if: ${{ github.event.inputs.OPLUS_FEATURES == 'yes' }}
+        run: |
+          cd kernel_tree
+          sed -i -e '/# CONFIG_OPLUS_PORT is not set/c\CONFIG_OPLUS_PORT=y;' arch/arm64/configs/vendor/alioth_defconfig
 
       - name: Apply Modifications (if modified build)
         if: matrix.kernel == 2 || matrix.kernel == 4
@@ -215,7 +229,11 @@ jobs:
       - name: Define ZIP Name
         run: |
           COMPILED_DATE=$(date +%Y%m%d)
-          echo "ZIP_NAME=[FD-][TEST-${{ github.event.inputs.CODENAME }}-$COMPILED_DATE]" >> $GITHUB_ENV
+          EXTRA=""
+          if [[ "${{ github.event.inputs.OPLUS_FEATURES }}" == "yes" ]]; then
+            EXTRA="-OPLUS"
+          fi
+          echo "ZIP_NAME=[FD-][TEST-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
 
       - name: Upload Flashable Kernel Zip
         uses: actions/upload-artifact@v4
