@@ -23,5 +23,9 @@ How to use:
 4. Run the workflow, output will be a single .zip file with:
    - Alioth = (4 dtbo, 4 dtb and 1 Image.gz)
    - The rest = (2 dtbo, 4 dtb and 1 Image.gz)
-  
+
+Additional features:
+1. OPLUS features for some oplus ports to work properly (this needs changes in the kernel repo)
+2. Skip nextpatch.sh if you don't need it
+
 If you found any issue, contact me on Telegram (@KaminariKo).
