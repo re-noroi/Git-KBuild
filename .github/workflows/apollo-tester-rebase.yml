@@ -81,7 +81,7 @@ jobs:
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
-            wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/10032024/neutron-clang-10032024.tar.zst -O clang.tar.zst
+            wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/30072026/neutron-clang-30072026.tar.zst -O clang.tar.zst
             mkdir clang
             unzstd -d clang.tar.zst
             tar -xf clang.tar -C clang
