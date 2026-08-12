@@ -121,6 +121,12 @@ jobs:
           cd kernel_tree
           patch -p1 -f < "0001-stock-gpu-freq.patch"
 
+      - name: Disable MLGO flags for Neutron Clang
+        if: ${{ github.event.inputs.COMPILER == 'neutron' }}
+        run: |
+          cd kernel_tree
+          sed -i -e '/regalloc-enable-advisor/s/^/#/' -e '/enable-ml-inliner/s/^/#/' Makefile
+
       - name: Change LTO Type
         if: ${{ github.event.inputs.LTO_CHOICE == 'thin_lto' }}
         run: |
