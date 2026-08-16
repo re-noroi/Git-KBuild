@@ -188,7 +188,7 @@ jobs:
 
       - name: Upload Kernel Artifacts
         uses: actions/upload-artifact@v4
-        if: if: matrix.kernel == 1 || matrix.kernel == 2
+        if: matrix.kernel == 1 || matrix.kernel == 2
         with:
           name: kernel-${{ matrix.kernel }}-base
           path: |
