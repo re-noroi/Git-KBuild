@@ -8,6 +8,10 @@ on:
         description: 'Kernel Tree'
         default: 'https://github.com/re-noroi/kernel_sm8250'
         required: true
+      KERNEL_TREE_BRANCH_1:
+        description: 'Kernel Tree Branch 1'
+        default: 'freesia'
+        required: true
       CODENAME:
         description: 'Phone Codename'
         default: 'munch'
@@ -77,13 +81,7 @@ jobs:
           
       - name: Set Kernel Environment Variables
         run: |
-          echo "KERNEL_TREE=${{ github.event.inputs.KERNEL_TREE_1 }}" >> $GITHUB_ENV
-          case "${{ matrix.kernel }}" in
-            1) echo "KERNEL_TREE_BRANCH=next-main" >> $GITHUB_ENV ;;
-            2) echo "KERNEL_TREE_BRANCH=next-susfs" >> $GITHUB_ENV ;;
-            3) echo "KERNEL_TREE_BRANCH=no-ksu" >> $GITHUB_ENV ;;
-            4) echo "KERNEL_TREE_BRANCH=freesia" >> $GITHUB_ENV ;;
-          esac
+          echo "KERNEL_TREE_BRANCH=${{ github.event.inputs.KERNEL_TREE_BRANCH_1 }}" >> $GITHUB_ENV
          
       - name: Checkout Kernel via PAT
         env:
@@ -115,11 +113,16 @@ jobs:
           \t#endif\
           \t\tbreak;' drivers/power/supply/qcom/qpnp-fg-gen4.c
       
-      - name: Apply Patches (Skip for Kernel 3)
-        if: matrix.kernel != 3
+      - name: Remove KSU (Apply only for kernel 2)
+        if: matrix.kernel == 2
         run: |
           cd kernel_tree
-          bash nextpatch.sh
+          sed -i -e '/CONFIG_KSU=y/c\# CONFIG_KSU is not set;' arch/arm64/configs/vendor/munch_defconfig
+          sed -i -e '/CONFIG_KSU_TAMPER_SYSCALL_TABLE=y/c\# CONFIG_KSU_TAMPER_SYSCALL_TABLE is not set;' arch/arm64/configs/vendor/munch_defconfig
+          sed -i -e '/CONFIG_KSU_FEATURE_SULOG=y/c\# CONFIG_KSU_FEATURE_SULOG is not set;' arch/arm64/configs/vendor/munch_defconfig
+          sed -i -e '/CONFIG_KSU_FEATURE_ADBROOT=y/c\# CONFIG_KSU_FEATURE_ADBROOT is not set;' arch/arm64/configs/vendor/munch_defconfig
+          sed -i -e '/CONFIG_KSU_LSM_SECURITY_HOOKS=y/c\# CONFIG_KSU_LSM_SECURITY_HOOKS is not set;' arch/arm64/configs/vendor/munch_defconfig
+          sed -i -e '/CONFIG_KSU_HEURISTIC_IN_TREE_BUILD=y/c\# CONFIG_KSU_HEURISTIC_IN_TREE_BUILD is not set;' arch/arm64/configs/vendor/munch_defconfig
 
       - name: Revert to stock gpufreq
         if: matrix.kernel == 3 || matrix.kernel == 4
@@ -178,7 +181,6 @@ jobs:
             mv out/arch/arm64/boot/dtbo.img ../munch-miui-dtbo.img
             mv out/arch/arm64/boot/dtb.img ../munch-effcpu-dtb
           elif [[ "${{ matrix.kernel }}" == 3 ]]; then
-            cp out/arch/arm64/boot/Image.gz ../Image.gz
             mv out/arch/arm64/boot/dtb.img ../munch-normal-gpustk-dtb
           else
             mv out/arch/arm64/boot/dtb.img ../munch-effcpu-gpustk-dtb
@@ -186,7 +188,7 @@ jobs:
 
       - name: Upload Kernel Artifacts
         uses: actions/upload-artifact@v4
-        if: matrix.kernel != 4
+        if: if: matrix.kernel == 1 || matrix.kernel == 2
         with:
           name: kernel-${{ matrix.kernel }}-base
           path: |
@@ -230,7 +232,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        kernel: [1, 2, 3]
+        kernel: [1, 2]
     runs-on: ubuntu-latest
 
     steps:
@@ -283,9 +285,7 @@ jobs:
             EXTRA="-OPLUS"
           fi
           if [[ "${{ matrix.kernel }}" == "1" ]]; then
-            echo "ZIP_NAME=[FD-][next-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
-          elif [[ "${{ matrix.kernel }}" == "2" ]]; then
-            echo "ZIP_NAME=[FD-][susfs-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
+            echo "ZIP_NAME=[FD-][ksu-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
           else
             echo "ZIP_NAME=[FD-][noksu-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
           fi
