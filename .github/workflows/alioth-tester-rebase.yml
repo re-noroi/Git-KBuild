@@ -136,12 +136,6 @@ jobs:
           sed -i -e '/# CONFIG_LTO_CLANG_THIN is not set/c\CONFIG_LTO_CLANG_THIN=y;' arch/arm64/configs/vendor/alioth_defconfig
           sed -i -e '/CONFIG_LTO_CLANG_FULL=y/c\# CONFIG_LTO_CLANG_FULL is not set;' arch/arm64/configs/vendor/alioth_defconfig
 
-      - name: Apply Patches
-        if: ${{ github.event.inputs.PATCH_SKIP == 'no' }}
-        run: |
-          cd kernel_tree
-          bash nextpatch.sh
-
       - name: Oplus Features
         if: ${{ github.event.inputs.OPLUS_FEATURES == 'yes' }}
         run: |
