@@ -40,14 +40,6 @@ on:
           - full_lto
           - thin_lto
         default: full_lto
-      PATCH_SKIP:
-        description: 'select yes if for stable branch'
-        required: true
-        type: choice
-        options:
-          - 'yes'
-          - 'no'
-        default: 'no'
       OPLUS_FEATURES:
         description: 'select yes if you want oplus features'
         required: true
@@ -119,9 +111,7 @@ jobs:
         if: matrix.kernel == 3 || matrix.kernel == 4
         run: |
           cd kernel_tree
-          if [[ "${{ github.event.inputs.PATCH_SKIP }}" == "no" ]]; then
-            patch -p1 -f < "0001-stock-gpu-freq.patch"
-          fi
+          patch -p1 -f < "0001-stock-gpu-freq.patch"
 
       - name: Disable MLGO flags for Neutron Clang
         if: ${{ github.event.inputs.COMPILER == 'neutron' }}
