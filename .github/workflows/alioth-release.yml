@@ -117,6 +117,7 @@ jobs:
         run: |
           cd kernel_tree
           sed -i -e '/qcom,j3s-batt-profile;/d' arch/arm64/boot/dts/vendor/qcom/alioth-sm8250.dtsi
+          sed -i -e '/fg-gen4-batterydata-apollo-sun-5000mah.dtsi/d' arch/arm64/boot/dts/vendor/qcom/alioth-sm8250.dtsi
 
       - name: Revert to stock gpufreq
         if: matrix.kernel == 3 || matrix.kernel == 4
