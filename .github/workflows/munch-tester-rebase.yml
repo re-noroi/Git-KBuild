@@ -34,6 +34,15 @@ on:
           - r574158
           - r614150
         default: neutron
+      VARIANT:
+        description: '-W is only for rename'
+        required: true
+        type: choice
+        options:
+          - stock
+          - W-variant
+          - oplus-variant
+        default: stock
       LTO_CHOICE:
         required: true
         type: choice
@@ -41,14 +50,6 @@ on:
           - full_lto
           - thin_lto
         default: full_lto
-      OPLUS_FEATURES:
-        description: 'select yes if you want oplus features'
-        required: true
-        type: choice
-        options:
-          - 'yes'
-          - 'no'
-        default: 'no'
 
 jobs:
   build:
@@ -103,8 +104,14 @@ jobs:
       - name: Kernel Version
         run: |
           cd kernel_tree
+          EXTRA=""
+          if [[ "${{ github.event.inputs.VARIANT }}" == "W-variant" ]]; then
+            EXTRA="-W"
+          elif [[ "${{ github.event.inputs.VARIANT }}" == "oplus-variant" ]]; then
+            EXTRA="-oplus"
+          fi
           if [[ "${{ github.event.inputs.CUSTOM_SED }}" != "-FakeDreamer" ]]; then
-            sed -i -e 's/CONFIG_LOCALVERSION="-FakeDreamer"/CONFIG_LOCALVERSION="${{ github.event.inputs.CUSTOM_SED }}"/' arch/arm64/configs/vendor/munch_defconfig
+            sed -i -e 's/CONFIG_LOCALVERSION="-FakeDreamer"/CONFIG_LOCALVERSION="${{ github.event.inputs.CUSTOM_SED }}${EXTRA}"/' arch/arm64/configs/vendor/munch_defconfig
           fi
 
       - name: Remove cycle count
@@ -139,7 +146,7 @@ jobs:
           sed -i -e '/CONFIG_LTO_CLANG_FULL=y/c\# CONFIG_LTO_CLANG_FULL is not set;' arch/arm64/configs/vendor/munch_defconfig
 
       - name: Oplus Features
-        if: ${{ github.event.inputs.OPLUS_FEATURES == 'yes' }}
+        if: ${{ github.event.inputs.VARIANT == 'oplus-variant' }}
         run: |
           cd kernel_tree
           sed -i -e '/# CONFIG_OPLUS_PORT is not set/c\CONFIG_OPLUS_PORT=y;' arch/arm64/configs/vendor/munch_defconfig
@@ -231,11 +238,13 @@ jobs:
       - name: Define ZIP Name
         run: |
           COMPILED_DATE=$(date +%Y%m%d)
-          EXTRA=""
-          if [[ "${{ github.event.inputs.OPLUS_FEATURES }}" == "yes" ]]; then
-            EXTRA="-OPLUS"
+          EXTRA2=""
+          if [[ "${{ github.event.inputs.VARIANT }}" == "W-variant" ]]; then
+            EXTRA2="-W"
+          elif [[ "${{ github.event.inputs.VARIANT }}" == "oplus-variant" ]]; then
+            EXTRA2="-OPLUS"
           fi
-          echo "ZIP_NAME=[FD-][TEST-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA}]" >> $GITHUB_ENV
+          echo "ZIP_NAME=[FD-][TEST-${{ github.event.inputs.CODENAME }}-${COMPILED_DATE}${EXTRA2}]" >> $GITHUB_ENV
 
       - name: Upload Flashable Kernel Zip
         uses: actions/upload-artifact@v4
