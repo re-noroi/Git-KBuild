@@ -32,6 +32,7 @@ on:
           - neutron
           - r547379
           - r574158
+          - r614150
         default: neutron
       LTO_CHOICE:
         required: true
@@ -70,6 +71,10 @@ jobs:
             tar -xf clang.tar.gz -C clang
           elif [[ "${{ github.event.inputs.COMPILER }}" == "r574158" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/ebcc6c3bef363bc539ea39f45b6abae1dce6ff1a/clang-r574158.tar.gz -O clang.tar.gz
+            mkdir clang
+            tar -xf clang.tar.gz -C clang
+          elif [[ "${{ github.event.inputs.COMPILER }}" == "r614150" ]]; then
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/c66f8b376703f420d791cf01547d076649651aa8/clang-r614150.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
