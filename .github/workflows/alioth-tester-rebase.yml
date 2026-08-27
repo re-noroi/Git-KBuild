@@ -32,7 +32,7 @@ on:
           - neutron
           - r547379
           - r574158
-        default: r547379
+        default: neutron
       LTO_CHOICE:
         required: true
         type: choice
