@@ -13,7 +13,7 @@ on:
         default: 'freesia'
         required: true
       CODENAME:
-        description: 'Phone Codename'
+        description: 'Codename (do not change)'
         default: 'munch'
         required: true
       ANYKERNEL_URL:
