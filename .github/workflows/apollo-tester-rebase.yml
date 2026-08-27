@@ -30,9 +30,9 @@ on:
         type: choice
         options:
           - neutron
-          - aosp
-          - aosp-21
-        default: aosp
+          - r547379
+          - r574158
+        default: r547379
       LTO_CHOICE:
         required: true
         type: choice
@@ -64,11 +64,11 @@ jobs:
 
       - name: Download & Extract Clang
         run: |
-          if [[ "${{ github.event.inputs.COMPILER }}" == "aosp" ]]; then
+          if [[ "${{ github.event.inputs.COMPILER }}" == "r547379" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
-          elif [[ "${{ github.event.inputs.COMPILER }}" == "aosp-21" ]]; then
+          elif [[ "${{ github.event.inputs.COMPILER }}" == "r574158" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/ebcc6c3bef363bc539ea39f45b6abae1dce6ff1a/clang-r574158.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
