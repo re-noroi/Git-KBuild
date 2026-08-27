@@ -110,7 +110,7 @@ jobs:
             EXTRA="-oplus"
           fi
           if [[ "${{ github.event.inputs.CUSTOM_SED }}" != "-FakeDreamer" ]]; then
-            sed -i -e 's/CONFIG_LOCALVERSION="-FakeDreamer"/CONFIG_LOCALVERSION="${{ github.event.inputs.CUSTOM_SED }}${EXTRA}"/' arch/arm64/configs/vendor/munch_defconfig
+            sed -i -e "s/CONFIG_LOCALVERSION=\"-FakeDreamer\"/CONFIG_LOCALVERSION=\"${{ github.event.inputs.CUSTOM_SED }}${EXTRA}\"/" arch/arm64/configs/vendor/munch_defconfig
           fi
 
       - name: Remove cycle count
