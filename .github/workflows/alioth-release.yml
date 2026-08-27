@@ -50,6 +50,14 @@ on:
           - full_lto
           - thin_lto
         default: full_lto
+      REMOVE_CYCLE_COUNT:
+        description: 'Remove cycle count'
+        required: true
+        type: choice
+        options:
+          - no
+          - yes
+        default: no
 
 jobs:
   build:
@@ -110,7 +118,20 @@ jobs:
             EXTRA="-oplus"
           fi
           sed -i -e "s/CONFIG_LOCALVERSION=\"-FakeDreamer\"/CONFIG_LOCALVERSION=\"${{ github.event.inputs.CUSTOM_SED }}${EXTRA}\"/" arch/arm64/configs/vendor/alioth_defconfig
-      
+
+      - name: Remove cycle count
+        if: ${{ github.event.inputs.REMOVE_CYCLE_COUNT == 'yes' }}
+        run: |
+          cd kernel_tree
+          sed -i '/case POWER_SUPPLY_PROP_CYCLE_COUNT:/,/break;/c\
+          \tcase POWER_SUPPLY_PROP_CYCLE_COUNT:\
+          \t#ifdef CONFIG_BATT_VERIFY_BY_DS28E16\
+          \t\tpval->intval = fg->maxim_cycle_count;\
+          \t#else\
+          \t\trc = get_cycle_count(chip->counter, &pval->intval);\
+          \t#endif\
+          \t\tbreak;' drivers/power/supply/qcom/qpnp-fg-gen4.c
+
       - name: Remove KSU (Apply only for kernel 2)
         if: matrix.kernel == 2
         run: |
