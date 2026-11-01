@@ -49,7 +49,7 @@ on:
         options:
           - full_lto
           - thin_lto
-        default: full_lto
+        default: thin_lto
       REMOVE_CYCLE_COUNT:
         description: 'Remove cycle count'
         required: true
