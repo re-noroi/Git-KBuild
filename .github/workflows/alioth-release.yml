@@ -180,7 +180,7 @@ jobs:
         if: ${{ github.event.inputs.COMPILER == 'neutron' }}
         run: |
           cd kernel_tree
-          sed -i -e '/regalloc-enable-advisor/s/^/#/' -e '/enable-ml-inliner/s/^/#/' Makefile
+          sed -i -e '/regalloc-enable-advisor/s/^/#/' -e '/enable-ml-inliner/s/^/#/' -e '/ml-inliner-model-selector/s/^/#/' Makefile
 
       - name: Change LTO Type
         if: ${{ github.event.inputs.LTO_CHOICE == 'thin_lto' }}
