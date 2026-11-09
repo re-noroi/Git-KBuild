@@ -103,7 +103,7 @@ jobs:
             mkdir clang
             tar -xf clang.tar.gz -C clang
           elif [[ "${{ github.event.inputs.COMPILER }}" == "r614150" ]]; then
-            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/3b86e40facfff1eab4065614255d573293c10373/clang-r614150.tar.gz -O clang.tar.gz
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/16fae8ef5b856b1d3e02a55274e4327c5842bb34/clang-r614150.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
