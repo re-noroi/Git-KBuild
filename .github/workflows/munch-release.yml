@@ -33,6 +33,7 @@ on:
           - r547379
           - r574158
           - r614150
+          - r639965
         default: neutron
       VARIANT:
         description: '-W is only for rename'
@@ -96,6 +97,10 @@ jobs:
             tar -xf clang.tar.gz -C clang
           elif [[ "${{ github.event.inputs.COMPILER }}" == "r614150" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/16fae8ef5b856b1d3e02a55274e4327c5842bb34/clang-r614150.tar.gz -O clang.tar.gz
+            mkdir clang
+            tar -xf clang.tar.gz -C clang
+          elif [[ "${{ github.event.inputs.COMPILER }}" == "r639965" ]]; then
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/c85766b30cc6996057b3414cb30a8b2f0f98f75c/clang-r639965.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
           else
