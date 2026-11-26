@@ -165,7 +165,7 @@ jobs:
           patch -p1 -f < "0001-stock-gpu-freq.patch"
 
       - name: Strip incompatible MLGO flags for older compilers
-        if: ${{ github.event.inputs.COMPILER != 'r614150' }}
+        if: ${{ github.event.inputs.COMPILER != 'r614150' && github.event.inputs.COMPILER != 'r639965' }}
         run: |
           cd kernel_tree
           if [[ "${{ github.event.inputs.COMPILER }}" == "neutron" ]]; then
