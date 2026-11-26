@@ -70,6 +70,11 @@ on:
         required: false
         type: boolean
         default: false
+      ENABLE_SELINUX_SPOOF:
+        description: '[Extra] Spoof SELinux enforcing status'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -197,6 +202,11 @@ jobs:
           toggle_config "CONFIG_NOMOUNT" "${{ github.event.inputs.ENABLE_NOMOUNT }}"
           toggle_config "CONFIG_RW_SWAPPINESS" "${{ github.event.inputs.ENABLE_RW_SWAPPINESS }}"
           toggle_config "CONFIG_BYPASS_CHARGING" "${{ github.event.inputs.ENABLE_BYPASS_CHARGING }}"
+          if [[ "${{ github.event.inputs.VARIANT }}" == "oplus-variant" ]]; then
+            echo "  [=] CONFIG_SELINUX_SPOOF enabled via OPLUS_PORT default"
+          else
+            toggle_config "CONFIG_SELINUX_SPOOF" "${{ github.event.inputs.ENABLE_SELINUX_SPOOF }}"
+          fi
           echo "================================="
 
       - name: Apply Modifications (if modified build)
