@@ -30,7 +30,6 @@ on:
         type: choice
         options:
           - neutron
-          - r547379
           - r574158
           - r614150
           - r639965
@@ -95,11 +94,7 @@ jobs:
 
       - name: Download & Extract Clang
         run: |
-          if [[ "${{ github.event.inputs.COMPILER }}" == "r547379" ]]; then
-            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz
-            mkdir clang
-            tar -xf clang.tar.gz -C clang
-          elif [[ "${{ github.event.inputs.COMPILER }}" == "r574158" ]]; then
+          if [[ "${{ github.event.inputs.COMPILER }}" == "r574158" ]]; then
             wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/ebcc6c3bef363bc539ea39f45b6abae1dce6ff1a/clang-r574158.tar.gz -O clang.tar.gz
             mkdir clang
             tar -xf clang.tar.gz -C clang
